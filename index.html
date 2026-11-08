@@ -1,0 +1,868 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta property="og:title" content="ナナゴ問題集">
+<meta property="og:description" content="7子つながると眼がなくても生きる碁「ナナゴ」の問題集">
+<meta property="og:type" content="website">
+<title>ナナゴ問題集</title>
+<meta name="description" content="7子つながると眼がなくても生きる碁「ナナゴ」の問題集。基本問題・中級・上級シリーズを盤の上で解けます。">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+html{color-scheme:light}:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}
+/* Layout: 一覧は問題カードのグリッド。解く・作る画面は左に碁盤、右に操作パネル（狭い画面では縦積み） */
+:root{
+  --bg:#e7ebef; --surface:#f7f8fa; --ink:#1a1e24; --muted:#5a6470; --line:#cfd6de;
+  --accent:#1f4f7d; --accent-ink:#ffffff; --gold:#b9861f; --ok:#2f7a4a; --warn:#a23a2a;
+  --wood-a:#e2bd73; --wood-b:#cf9f52; --grid:#3a2810;
+  --f-display:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
+  --f-body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",system-ui,sans-serif;
+  --f-num:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#13171c; --surface:#1b2027; --ink:#e5e9ee; --muted:#98a2ae; --line:#2b323b;
+  --accent:#8ab8e6; --accent-ink:#0f1720; --gold:#e0b04a; --ok:#7cc795; --warn:#e48a78;
+  --wood-a:#c99f58; --wood-b:#b0823e; --grid:#2a1c08; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#13171c; --surface:#1b2027; --ink:#e5e9ee; --muted:#98a2ae; --line:#2b323b;
+  --accent:#8ab8e6; --accent-ink:#0f1720; --gold:#e0b04a; --ok:#7cc795; --warn:#e48a78;
+  --wood-a:#c99f58; --wood-b:#b0823e; --grid:#2a1c08; color-scheme:dark }
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6}
+.wrap{max-width:1120px;margin:0 auto;padding-block:20px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:20px}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px}
+.brand{display:flex;align-items:center;gap:14px;text-decoration:none;color:inherit;background:none;border:0;padding:0;cursor:pointer;font:inherit;text-align:left}
+.logo-mark{width:58px;height:58px;flex:none;filter:drop-shadow(0 6px 12px rgba(60,40,10,.28))}
+.wordmark{font-family:var(--f-display);font-weight:800;font-size:clamp(28px,5vw,38px);line-height:1;letter-spacing:.14em;margin:0}
+.wordmark .go{color:var(--gold)}
+.wordmark small{font-size:.5em;letter-spacing:.2em;margin-left:.4em;color:var(--ink)}
+.brand-sub{margin:6px 0 0;font-size:11px;font-weight:700;letter-spacing:.22em;color:var(--muted)}
+h2{font-family:var(--f-display);font-size:22px;margin:0;text-wrap:balance}
+h3{font-size:12px;letter-spacing:.12em;color:var(--muted);margin:0;font-weight:700}
+p{margin:0}
+.muted{color:var(--muted)}
+.btn{font:inherit;font-weight:700;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:9px 14px;cursor:pointer;min-height:40px}
+.btn:hover{border-color:var(--accent)}
+.btn:focus-visible,.seg button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.brand:focus-visible{outline:3px solid color-mix(in srgb,var(--accent) 45%,transparent);outline-offset:2px}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.danger{color:var(--warn)}
+.btn.small{min-height:32px;padding:5px 10px;font-size:13px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;gap:12px;min-width:0}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.seg button{flex:1;white-space:nowrap;font:inherit;font-size:14px;border:0;background:none;color:var(--ink);padding:8px 10px;cursor:pointer;min-height:38px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);font-weight:700}
+label.f{display:grid;gap:4px;font-size:13px;font-weight:700;color:var(--muted)}
+input[type=text],select,textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:7px 10px;width:100%;min-width:0}
+textarea{resize:vertical;min-height:70px}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;border-radius:999px;padding:2px 9px;border:1px solid var(--line);white-space:nowrap}
+.chip.live{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 50%,var(--line))}
+.chip.kill{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.chip.done{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 50%,var(--line))}
+.chip.ex{color:var(--muted)}
+.chip.lv-basic{background:color-mix(in srgb,var(--ok) 12%,transparent);color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}
+.chip.lv-mid{background:var(--gold);color:var(--surface);border-color:var(--gold)}
+.series-head.mid{border-bottom-color:var(--gold)}
+.card.mid{border-color:color-mix(in srgb,var(--gold) 45%,var(--line))}
+.chip.lv-adv{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.series{display:grid;gap:12px}
+.series-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+.series-head.adv{border-bottom-color:var(--ink)}
+.series-head h2 .en{font-family:var(--f-num);font-size:12px;letter-spacing:.14em;color:var(--muted);margin-left:8px;font-weight:500}
+.order-note{font-size:13px;font-weight:700;color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,transparent);border:1px solid color-mix(in srgb,var(--accent) 35%,var(--line));border-radius:10px;padding:8px 12px}
+.moveto{gap:6px}
+.moveto input{font:inherit;font-family:var(--f-num);font-size:14px;width:64px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+.card.ordering{border-style:dashed;border-color:var(--accent)}
+#b-order[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.card.adv{border-color:color-mix(in srgb,var(--ink) 35%,var(--line))}
+
+/* 一覧 */
+.listhead{display:flex;flex-wrap:wrap;gap:12px;align-items:end;justify-content:space-between}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:10px;align-content:start}
+.card canvas{width:100%;aspect-ratio:1;border-radius:8px;display:block;max-width:100%;cursor:pointer}
+.card .num{font-family:var(--f-num);font-size:12px;color:var(--muted)}
+.card .t{font-weight:700;line-height:1.35;overflow-wrap:anywhere}
+.empty{padding:28px;text-align:center;border:1px dashed var(--line);border-radius:14px;color:var(--muted)}
+
+/* 解く・作る */
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}
+@media (max-width:860px){.stage{grid-template-columns:minmax(0,1fr)}}
+.boardbox{position:relative;width:100%;max-width:640px;margin:0 auto;aspect-ratio:1}
+.boardbox canvas{width:100%;height:100%;display:block;border-radius:6px;box-shadow:0 14px 30px rgba(40,26,6,.28);touch-action:manipulation;cursor:pointer}
+.verdict{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(80%,420px);background:var(--surface);border:2px solid var(--gold);border-radius:16px;padding:18px 20px;display:grid;gap:6px;text-align:center;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.verdict.bad{border-color:var(--warn)}
+.verdict b{font-family:var(--f-display);font-size:clamp(26px,5vw,38px);line-height:1.2}
+.verdict.good b{color:var(--gold)}
+.verdict.bad b{color:var(--warn)}
+.verdict .note{font-size:14px}
+.verdict .hint{font-size:12px;color:var(--muted)}
+.ask{font-family:var(--f-display);font-size:20px;font-weight:800;line-height:1.4;display:flex;align-items:center;gap:10px}
+.dot{width:18px;height:18px;border-radius:50%;flex:none;box-shadow:inset -2px -3px 4px rgba(0,0,0,.35)}
+.dot.b{background:#1c1c1c}.dot.w{background:#f2f1ea;border:1px solid #bdb9ad}
+.msg{min-height:1.6em;font-weight:700}
+.msg.good{color:var(--ok)}.msg.bad{color:var(--warn)}
+.lines{display:grid;gap:6px;max-height:240px;overflow:auto}
+.line{display:flex;gap:8px;align-items:center;font-size:13px;border:1px solid var(--line);border-radius:8px;padding:6px 8px}
+.line .mv{font-family:var(--f-num);flex:1;min-width:0;overflow-wrap:anywhere}
+.line .ok{color:var(--ok);font-weight:700;white-space:nowrap}
+.line .ng{color:var(--warn);font-weight:700;white-space:nowrap}
+.err{color:var(--warn);font-weight:700;font-size:13px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.confirm{border:1px solid var(--warn);border-radius:10px;padding:10px;display:grid;gap:8px;font-size:13px}
+.note-s{font-size:12px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <button class="brand" id="home" type="button" aria-label="問題の一覧へ">
+      <svg class="logo-mark" viewBox="0 0 72 72" aria-hidden="true">
+        <defs>
+          <linearGradient id="lgWood" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e6c27c"/><stop offset="1" stop-color="#c99847"/></linearGradient>
+          <radialGradient id="lgStone" cx=".35" cy=".3" r=".85"><stop offset="0" stop-color="#5e5e5e"/><stop offset=".5" stop-color="#1c1c1c"/><stop offset="1" stop-color="#050505"/></radialGradient>
+        </defs>
+        <rect x="2" y="2" width="68" height="68" rx="16" fill="url(#lgWood)"/>
+        <rect x="2.75" y="2.75" width="66.5" height="66.5" rx="15.25" fill="none" stroke="#8c6020" stroke-opacity=".55" stroke-width="1.5"/>
+        <path d="M11 15H61M11 27H61M11 39H61M11 51H61M17 9V63M29 9V63M41 9V63M53 9V63" stroke="#3a2810" stroke-opacity=".38" stroke-width="1.2"/>
+        <path d="M17 15H53V51" fill="none" stroke="#e8b84a" stroke-opacity=".55" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+        <g fill="url(#lgStone)"><circle cx="17" cy="15" r="5.4"/><circle cx="29" cy="15" r="5.4"/><circle cx="41" cy="15" r="5.4"/><circle cx="53" cy="15" r="5.4"/><circle cx="53" cy="27" r="5.4"/><circle cx="53" cy="39" r="5.4"/><circle cx="53" cy="51" r="5.4"/></g>
+        <g fill="#ffffff" fill-opacity=".9"><circle cx="20" cy="35" r="5.2"/><circle cx="32" cy="47" r="5.2"/></g>
+      </svg>
+      <span>
+        <span class="wordmark">ナナ<span class="go">ゴ</span><small>問題集</small></span>
+        <span class="brand-sub" style="display:block">NANAGO PROBLEMS ― 7つながると生きる碁</span>
+      </span>
+    </button>
+    <div class="row" id="head-actions">
+      <button class="btn primary" id="b-new" type="button" hidden>＋ 新しい問題を作る</button>
+    </div>
+  </header>
+
+  <!-- 一覧 -->
+  <section id="v-list" style="display:grid;gap:16px">
+    <div class="listhead">
+      <div style="display:grid;gap:4px">
+        <h2>問題の一覧</h2>
+        <p class="muted" id="list-count"></p>
+      </div>
+      <div class="seg" id="filter" role="group" aria-label="問題の種類で絞り込む">
+        <button type="button" data-f="all" aria-pressed="true">すべて</button>
+        <button type="button" data-f="live" aria-pressed="false">生きる問題</button>
+        <button type="button" data-f="kill" aria-pressed="false">取る問題</button>
+      </div>
+    </div>
+    <div class="row" style="justify-content:space-between">
+    <div class="seg" id="lvfilter" role="group" aria-label="シリーズで絞り込む" style="max-width:520px">
+      <button type="button" data-l="all" aria-pressed="true">両方</button>
+      <button type="button" data-l="basic" aria-pressed="false">基本問題</button>
+      <button type="button" data-l="mid" aria-pressed="false">中級シリーズ</button>
+      <button type="button" data-l="adv" aria-pressed="false">上級シリーズ</button>
+    </div>
+    <button class="btn" id="b-order" type="button" aria-pressed="false" hidden>順番を編集</button>
+    </div>
+    <p class="order-note" id="order-note" hidden>「← 前へ」「後へ →」で1つずつ、または番号を入れて「移す」でその番号へ移せます（ほかの問題は1問ずつずれます）。番号はシリーズごとに付け直されます。終わったら「順番の編集を終える」を押してください。</p>
+    <div id="grid" style="display:grid;gap:28px"></div>
+    <div class="empty" id="empty" hidden>まだ問題がありません。「新しい問題を作る」から1問目を作ってください。</div>
+
+    <div class="panel" id="data-panel" hidden>
+      <h3>問題の保存と持ち出し</h3>
+      <p class="note-s">作った問題はこのブラウザに保存されます。別の端末へ移す時や、公開サイトに載せる時は「書き出す」で出てくる文字をコピーして、移した先の「読み込む」に貼り付けてください。</p>
+      <div class="row" style="justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--bg)">
+        <span style="display:grid;gap:2px;min-width:0"><b style="font-size:14px">Claudeが作った問題</b><span class="note-s" id="bundle-note">基本問題12問・中級シリーズ5問。どれもナナゴのルールで正解と相手の応じ方を読んで確かめてあります。</span></span>
+        <button class="btn small primary" id="b-bundle" type="button">12問を追加する</button>
+      </div>
+      <div class="row">
+        <button class="btn small" id="b-export" type="button">書き出す</button>
+        <button class="btn small" id="b-import" type="button">読み込む</button>
+      </div>
+      <div id="export-box" hidden style="display:grid;gap:8px">
+        <textarea id="export-text" rows="5" readonly></textarea>
+        <div class="row"><button class="btn small" id="b-copy" type="button">コピーする</button><span class="note-s" id="copy-msg"></span></div>
+      </div>
+      <div id="import-box" hidden style="display:grid;gap:8px">
+        <textarea id="import-text" rows="5" placeholder="書き出した文字をここに貼り付け"></textarea>
+        <div class="row"><button class="btn small primary" id="b-import-go" type="button">この問題を追加する</button><span class="err" id="import-msg"></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 解く -->
+  <section id="v-solve" hidden>
+    <div class="stage">
+      <div class="boardbox">
+        <canvas id="cv-solve" aria-label="問題の碁盤"></canvas>
+        <div class="verdict" id="verdict" hidden>
+          <b id="verdict-t"></b>
+          <p class="note" id="verdict-note"></p>
+          <p class="hint">盤をクリックすると閉じます</p>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="row" style="justify-content:space-between"><span class="num muted" id="s-num" style="font-family:var(--f-num);font-size:13px"></span><span id="s-chips" class="row"></span></div>
+        <h2 id="s-title"></h2>
+        <p class="ask" id="s-ask"></p>
+        <p class="muted" id="s-desc"></p>
+        <p class="msg" id="s-msg" aria-live="polite"></p>
+        <div class="row">
+          <button class="btn" id="b-retry" type="button">やり直す</button>
+          <button class="btn" id="b-hint" type="button">ヒント</button>
+          <button class="btn" id="b-answer" type="button">答えを見る</button>
+        </div>
+        <div class="row">
+          <button class="btn" id="b-prev" type="button">← 前の問題</button>
+          <button class="btn primary" id="b-next" type="button">次の問題 →</button>
+        </div>
+        <div class="row">
+          <button class="btn small" id="b-to-list" type="button">一覧へ戻る</button>
+          <button class="btn small" id="b-edit-this" type="button" hidden>この問題を編集</button>
+          <button class="btn small" id="b-report" type="button">問題の間違いを報告</button>
+        </div>
+        <div class="panel" id="report-box" hidden style="padding:12px;gap:8px;background:var(--bg)">
+          <h3>間違いの報告</h3>
+          <p class="note-s">正解なのに不正解になった、別の正解がある、問題文がおかしいなど、気づいたことを書いてください。今の手順も一緒に送られます。</p>
+          <textarea id="report-text" rows="3" maxlength="600" placeholder="例：B2でも生きられると思います"></textarea>
+          <div class="row">
+            <a class="btn small primary" id="report-go" href="#" target="_blank" rel="noopener">報告ページを開いて送る</a>
+            <button class="btn small" id="report-copy" type="button">報告文をコピー</button>
+          </div>
+          <p class="note-s" id="report-msg">報告ページ（GitHub）で「Submit new issue」を押すと届きます。GitHubのアカウントがない場合は「報告文をコピー」で文章を控えて、作者に届けてください。</p>
+        </div>
+        <div class="row" hidden>
+        </div>
+        <p class="note-s">金の輪は黒、銀の輪は白が7子以上つながった石です。つながった石は眼がなくても取られません。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 作る -->
+  <section id="v-edit" hidden>
+    <div class="stage">
+      <div style="display:grid;gap:10px">
+        <div class="boardbox"><canvas id="cv-edit" aria-label="問題を作る碁盤"></canvas></div>
+        <div class="legend" id="legend" hidden><span><i style="background:var(--ok)"></i>記録済みの正解の続き</span><span><i style="background:var(--warn)"></i>記録済みの不正解の続き</span></div>
+      </div>
+      <div style="display:grid;gap:14px">
+        <div class="panel">
+          <h3 id="e-head">新しい問題</h3>
+          <label class="f">題名<input type="text" id="e-title" maxlength="40" placeholder="例：あと1子で7子"></label>
+          <div style="display:grid;gap:4px"><span class="note-s" style="font-weight:700">シリーズ</span>
+            <div class="seg" id="e-level"><button type="button" data-v="basic" aria-pressed="true">基本問題</button><button type="button" data-v="mid" aria-pressed="false">中級シリーズ</button><button type="button" data-v="adv" aria-pressed="false">上級シリーズ</button></div>
+          </div>
+          <div style="display:grid;gap:4px"><span class="note-s" style="font-weight:700">種類</span>
+            <div class="seg" id="e-type"><button type="button" data-v="live" aria-pressed="true">7子つないで生きる</button><button type="button" data-v="kill" aria-pressed="false">7子を防いで取る</button></div>
+          </div>
+          <div class="row" style="gap:12px">
+            <label class="f" style="flex:1">手番<select id="e-first"><option value="1">黒番</option><option value="2">白番</option></select></label>
+            <label class="f" style="flex:1">盤の大きさ<select id="e-size"><option>5</option><option>7</option><option selected>9</option><option>11</option><option>13</option></select></label>
+            <label class="f" style="flex:1">つながる数<select id="e-chain"><option>5</option><option>6</option><option selected>7</option><option>8</option><option>9</option></select></label>
+          </div>
+          <label class="f">問題文（なくても大丈夫です）<textarea id="e-desc" rows="2" maxlength="200" placeholder="例：白に囲まれています。7子つないで生きてください。"></textarea></label>
+        </div>
+
+        <div class="panel" id="p-setup">
+          <h3>1. 石を並べる</h3>
+          <div class="seg" id="e-tool"><button type="button" data-v="1" aria-pressed="true">黒石</button><button type="button" data-v="2" aria-pressed="false">白石</button><button type="button" data-v="0" aria-pressed="false">消す</button></div>
+          <div style="display:grid;gap:4px"><span class="note-s" style="font-weight:700">マーク（石の上にも、空いている所にも付けられます）</span>
+            <div class="seg" id="e-mark"><button type="button" data-v="tri" aria-pressed="false" aria-label="三角">△</button><button type="button" data-v="sq" aria-pressed="false" aria-label="四角">□</button><button type="button" data-v="cir" aria-pressed="false" aria-label="丸">○</button><button type="button" data-v="x" aria-pressed="false" aria-label="バツ">×</button><button type="button" data-v="abc" aria-pressed="false" aria-label="文字">ABC</button><button type="button" data-v="del" aria-pressed="false" aria-label="マークを消す">消す</button></div>
+          </div>
+          <p class="note-s">盤をクリックして置きます。同じ石や同じマークをもう一度クリックすると消えます。</p>
+          <div class="row"><button class="btn small" id="b-clear" type="button">石を全部消す</button><button class="btn small" id="b-clear-marks" type="button">マークを全部消す</button></div>
+        </div>
+
+        <div class="panel" id="p-lines">
+          <h3>2. 手順を記録する</h3>
+          <p class="note-s">「記録を始める」を押して、正解の手順を最後まで交互に打ちます。打ち終えたら「正解として保存」。間違えやすい手とその答え（相手の応じ方）も「不正解として保存」で残せます。記録していない手は不正解になります。</p>
+          <div class="row" id="rec-idle">
+            <button class="btn primary" id="b-rec" type="button">記録を始める</button>
+          </div>
+          <div id="rec-on" hidden style="display:grid;gap:8px">
+            <p class="msg" id="rec-msg"></p>
+            <label class="f">ひとこと（結果と一緒に表示されます）<input type="text" id="rec-note" maxlength="60" placeholder="例：7子つながって生きました"></label>
+            <div class="row">
+              <button class="btn small" id="b-rec-undo" type="button">1手戻す</button>
+              <button class="btn small" id="b-rec-ok" type="button" style="color:var(--ok)">正解として保存</button>
+              <button class="btn small" id="b-rec-ng" type="button" style="color:var(--warn)">不正解として保存</button>
+              <button class="btn small" id="b-rec-stop" type="button">記録をやめる</button>
+            </div>
+          </div>
+          <div class="lines" id="lines"></div>
+        </div>
+
+        <div class="panel">
+          <p class="err" id="e-err" aria-live="polite"></p>
+          <div class="row">
+            <button class="btn primary" id="b-save" type="button">問題を保存する</button>
+            <button class="btn" id="b-test" type="button">保存して解いてみる</button>
+            <button class="btn" id="b-cancel" type="button">やめる</button>
+          </div>
+          <div class="row"><button class="btn small danger" id="b-del" type="button" hidden>この問題を削除</button></div>
+          <div class="confirm" id="del-confirm" hidden>
+            <span>この問題を削除します。元に戻せません。</span>
+            <div class="row"><button class="btn small danger" id="b-del-yes" type="button">削除する</button><button class="btn small" id="b-del-no" type="button">やめる</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const store = {
+    get(k){ try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch { return null; } },
+    set(k, v){ try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+  };
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const LET = "ABCDEFGHJKLMNOPQRST";
+  const coord = (i, n) => LET[i % n] + (n - Math.floor(i / n));
+  const colName = c => c === 1 ? "黒" : "白";
+
+  /* ---------- 例題（このブラウザに問題がまだない時だけ入る） ---------- */
+  const EXAMPLES = [
+    { id: "ex1", ex: true, title: "例題：あと1子で7子", type: "live", size: 9, first: 1, chainN: 7,
+      desc: "黒の6子は眼がなく、呼吸点はあと1つです。",
+      b: [73,74,75,76,77,78], w: [64,65,66,67,68,69,72],
+      lines: [{ moves: [79], ok: true, note: "7子つながって、眼がなくても生きました" }] },
+    { id: "ex2", ex: true, title: "例題：つながる前に取る", type: "kill", size: 9, first: 1, chainN: 7,
+      desc: "白の6子があと1子で7子つながります。",
+      b: [0,10,11,12,13,14,15], w: [1,2,3,4,5,6],
+      lines: [{ moves: [7], ok: true, note: "7子つながる前に6子を取りました" }] }
+  ];
+  const PUBLIC = true;
+  const REPORT_URL = "https://github.com/igo-risyo/nanago-problems/issues/new";
+  let problems = [];
+  let solved = new Set(store.get("nanago-pub-solved") || []);
+  const LV = { basic: "基本問題", mid: "中級シリーズ", adv: "上級シリーズ" };
+  const lvChip = l => `<span class="chip lv-${l}">${{ basic: "基本", mid: "中級", adv: "上級" }[l]}</span>`;
+  const series = l => problems.filter(p => p.level === l);
+  const noIn = p => series(p.level).indexOf(p) + 1;
+  const saveAll = () => {};
+  const saveSolved = () => store.set("nanago-pub-solved", [...solved]);
+  const newId = () => "p" + Date.now().toString(36) + Math.floor(Math.random() * 1e4).toString(36);
+
+  /* ---------- 碁のルール（7子つながった石は取られない） ---------- */
+  function nbrs(i, n){ const x = i % n, y = (i / n) | 0, r = []; if (x > 0) r.push(i - 1); if (x < n - 1) r.push(i + 1); if (y > 0) r.push(i - n); if (y < n - 1) r.push(i + n); return r; }
+  function group(b, n, i){
+    const c = b[i], st = [i], seen = new Set([i]), libs = new Set();
+    for (let k = 0; k < st.length; k++) for (const j of nbrs(st[k], n)) {
+      if (b[j] === 0) libs.add(j); else if (b[j] === c && !seen.has(j)) { seen.add(j); st.push(j); }
+    }
+    return { stones: st, libs };
+  }
+  // 戻り値：{ ok, b, cap, ko, why }
+  function play(b0, n, i, c, chainN, ko){
+    if (b0[i]) return { ok: false, why: "そこには石があります" };
+    if (i === ko) return { ok: false, why: "コウなので、すぐには取り返せません" };
+    const b = b0.slice(); b[i] = c; let cap = [];
+    for (const j of nbrs(i, n)) if (b[j] === 3 - c) {
+      const g = group(b, n, j);
+      if (g.libs.size === 0 && g.stones.length < chainN) { for (const s of g.stones) b[s] = 0; cap = cap.concat(g.stones); }
+    }
+    const me = group(b, n, i);
+    if (me.libs.size === 0 && me.stones.length < chainN) return { ok: false, why: "そこに打つと自分の石が取られてしまいます（着手禁止）" };
+    const nko = cap.length === 1 && me.stones.length === 1 && me.libs.size === 1 ? cap[0] : -1;
+    return { ok: true, b, cap, ko: nko };
+  }
+  function setupBoard(p){ const b = new Array(p.size * p.size).fill(0); p.b.forEach(i => b[i] = 1); p.w.forEach(i => b[i] = 2); return b; }
+  // 手順を最初から並べ直す
+  function replay(p, moves){
+    let b = setupBoard(p), ko = -1, c = p.first;
+    for (const m of moves) { const r = play(b, p.size, m, c, p.chainN, ko); if (!r.ok) return null; b = r.b; ko = r.ko; c = 3 - c; }
+    return { b, ko, turn: c };
+  }
+
+  /* ---------- 盤を描く ---------- */
+  function fit(cv){
+    const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+    const W = Math.max(120, Math.round(r.width));
+    if (cv.width !== Math.round(W * d)) { cv.width = Math.round(W * d); cv.height = Math.round(W * d); }
+    const ctx = cv.getContext("2d"); ctx.setTransform(cv.width / W, 0, 0, cv.height / W, 0, 0);
+    return { ctx, W };
+  }
+  function stone(ctx, x, y, r, c, alpha){
+    ctx.save(); if (alpha) ctx.globalAlpha = alpha;
+    ctx.shadowColor = "rgba(0,0,0,.35)"; ctx.shadowBlur = r * .35; ctx.shadowOffsetX = r * .08; ctx.shadowOffsetY = r * .12;
+    const g = ctx.createRadialGradient(x - r * .35, y - r * .4, r * .1, x, y, r);
+    if (c === 1) { g.addColorStop(0, "#5c5c5c"); g.addColorStop(.45, "#1c1c1c"); g.addColorStop(1, "#050505"); }
+    else { g.addColorStop(0, "#ffffff"); g.addColorStop(.6, "#eeede6"); g.addColorStop(1, "#c9c7bd"); }
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.restore();
+  }
+  function stars(n){
+    if (n === 9) return [20, 24, 56, 60, 40];
+    if (n === 13) return [42, 48, 120, 126, 84];
+    if (n === 11) return [24, 30, 90, 96, 60];
+    if (n === 7 || n === 5) return [(n * n - 1) / 2];
+    return [];
+  }
+  // opt: { b, n, chainN, last, ghost:{i,c}, marks:[{i,color}], small }
+  function drawBoard(cv, o){
+    const { ctx, W } = fit(cv), n = o.n, cell = W / (n + 1);
+    const wg = ctx.createLinearGradient(0, 0, W, W); wg.addColorStop(0, css("--wood-a")); wg.addColorStop(1, css("--wood-b"));
+    ctx.fillStyle = wg; ctx.fillRect(0, 0, W, W);
+    ctx.strokeStyle = css("--grid"); ctx.lineWidth = Math.max(1, cell * .03);
+    for (let k = 1; k <= n; k++) {
+      ctx.beginPath(); ctx.moveTo(cell, k * cell); ctx.lineTo(n * cell, k * cell); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(k * cell, cell); ctx.lineTo(k * cell, n * cell); ctx.stroke();
+    }
+    ctx.lineWidth = Math.max(1.5, cell * .05); ctx.strokeRect(cell, cell, (n - 1) * cell, (n - 1) * cell);
+    ctx.fillStyle = css("--grid");
+    for (const s of stars(n)) { ctx.beginPath(); ctx.arc((s % n + 1) * cell, ((s / n | 0) + 1) * cell, Math.max(2, cell * .08), 0, 7); ctx.fill(); }
+    if (!o.small) {
+      ctx.fillStyle = css("--grid"); ctx.globalAlpha = .7; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.font = `500 ${Math.round(cell * .3)}px "IBM Plex Mono", monospace`;
+      for (let k = 0; k < n; k++) { ctx.fillText(LET[k], (k + 1) * cell, cell * .45); ctx.fillText(String(n - k), cell * .45, (k + 1) * cell); }
+      ctx.globalAlpha = 1;
+    }
+    // 7子以上つながった石に輪をつける
+    const ring = new Set();
+    const seen = new Set();
+    o.b.forEach((c, i) => { if (!c || seen.has(i)) return; const g = group(o.b, n, i); g.stones.forEach(s => seen.add(s)); if (g.stones.length >= o.chainN) g.stones.forEach(s => ring.add(s)); });
+    const r = cell * .46;
+    o.b.forEach((c, i) => {
+      if (!c) return; const x = (i % n + 1) * cell, y = ((i / n | 0) + 1) * cell;
+      stone(ctx, x, y, r, c);
+      if (ring.has(i)) { ctx.save(); ctx.lineWidth = Math.max(1.5, cell * .07); ctx.strokeStyle = c === 1 ? "#e3b23c" : "#aeb6c2"; ctx.beginPath(); ctx.arc(x, y, r * .62, 0, 7); ctx.stroke(); ctx.restore(); }
+    });
+    if (o.last != null && o.last >= 0 && o.b[o.last] && !(o.symbols && o.symbols[o.last])) {
+      const x = (o.last % n + 1) * cell, y = ((o.last / n | 0) + 1) * cell;
+      ctx.save(); ctx.lineWidth = Math.max(1.5, cell * .06); ctx.strokeStyle = o.b[o.last] === 1 ? "#ffffff" : "#1a1a1a"; ctx.beginPath(); ctx.arc(x, y, r * .38, 0, 7); ctx.stroke(); ctx.restore();
+    }
+    // 問題のマーク（△□○×・文字）
+    const sym = o.symbols || {};
+    for (const k in sym) {
+      const i = +k, v = sym[k]; if (i < 0 || i >= n * n) continue;
+      const x = (i % n + 1) * cell, y = ((i / n | 0) + 1) * cell, c = o.b[i];
+      const col = c === 1 ? "#ffffff" : c === 2 ? "#1a1a1a" : css("--grid");
+      ctx.save(); ctx.strokeStyle = col; ctx.fillStyle = col; ctx.lineWidth = Math.max(1.6, cell * .07); ctx.lineJoin = "round";
+      const s2 = r * .5;
+      if (!c) { ctx.fillStyle = wg; ctx.beginPath(); ctx.arc(x, y, r * .55, 0, 7); ctx.fill(); ctx.fillStyle = col; }
+      if (v === "tri") { ctx.beginPath(); ctx.moveTo(x, y - s2 * 1.05); ctx.lineTo(x + s2 * .95, y + s2 * .6); ctx.lineTo(x - s2 * .95, y + s2 * .6); ctx.closePath(); ctx.stroke(); }
+      else if (v === "sq") ctx.strokeRect(x - s2 * .75, y - s2 * .75, s2 * 1.5, s2 * 1.5);
+      else if (v === "cir") { ctx.beginPath(); ctx.arc(x, y, s2 * .8, 0, 7); ctx.stroke(); }
+      else if (v === "x") { ctx.beginPath(); ctx.moveTo(x - s2 * .7, y - s2 * .7); ctx.lineTo(x + s2 * .7, y + s2 * .7); ctx.moveTo(x + s2 * .7, y - s2 * .7); ctx.lineTo(x - s2 * .7, y + s2 * .7); ctx.stroke(); }
+      else { ctx.font = `700 ${Math.round(cell * .46)}px "IBM Plex Mono", monospace`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(v, x, y + cell * .02); }
+      ctx.restore();
+    }
+    for (const m of o.marks || []) {
+      const x = (m.i % n + 1) * cell, y = ((m.i / n | 0) + 1) * cell;
+      ctx.save(); ctx.fillStyle = m.color; ctx.globalAlpha = .85; ctx.beginPath(); ctx.arc(x, y, r * .42, 0, 7); ctx.fill();
+      if (m.label) { ctx.globalAlpha = 1; ctx.fillStyle = "#fff"; ctx.font = `700 ${Math.round(cell * .32)}px "Zen Kaku Gothic New", sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(m.label, x, y + 1); }
+      ctx.restore();
+    }
+    if (o.ghost && o.ghost.i >= 0 && !o.b[o.ghost.i]) {
+      const i = o.ghost.i; stone(ctx, (i % n + 1) * cell, ((i / n | 0) + 1) * cell, r, o.ghost.c, .45);
+    }
+  }
+  function pointAt(cv, n, e){
+    const r = cv.getBoundingClientRect(), cell = r.width / (n + 1);
+    const x = Math.round((e.clientX - r.left) / cell) - 1, y = Math.round((e.clientY - r.top) / cell) - 1;
+    return x >= 0 && y >= 0 && x < n && y < n ? y * n + x : -1;
+  }
+
+  /* ---------- 画面の切り替え ---------- */
+  let view = "list";
+  function show(v){
+    view = v; if (v !== "list") ordering = false;
+    $("v-list").hidden = v !== "list"; $("v-solve").hidden = v !== "solve"; $("v-edit").hidden = v !== "edit";
+    $("b-new").hidden = true;
+    window.scrollTo({ top: 0 });
+    if (v === "list") renderList(); else if (v === "solve") drawSolve(); else drawEdit();
+  }
+
+  /* ---------- 一覧 ---------- */
+  let filter = "all", lvFilter = "all", ordering = false;
+  const typeChip = t => t === "live" ? `<span class="chip live">7子つないで生きる</span>` : `<span class="chip kill">7子を防いで取る</span>`;
+  function renderList(){
+    // 順番の編集中は種類の絞り込みを外して、シリーズの全問を並べる
+    const list = problems.filter(p => ordering || filter === "all" || p.type === filter);
+    $("filter").style.visibility = ordering ? "hidden" : "";
+    $("b-order").textContent = ordering ? "順番の編集を終える" : "順番を編集"; $("b-order").setAttribute("aria-pressed", String(ordering));
+    $("order-note").hidden = !ordering;
+    $("list-count").textContent = `${problems.length}問・解けた問題 ${problems.filter(p => solved.has(p.id)).length}問`;
+    $("empty").hidden = problems.length > 0;
+    const card = p => `<article class="card${p.level !== "basic" ? " " + p.level : ""}${ordering ? " ordering" : ""}" data-id="${p.id}">
+        <canvas data-thumb="${p.id}" aria-label="${esc(p.title)}の盤面" role="img"></canvas>
+        <div class="row" style="justify-content:space-between"><span class="row" style="gap:6px">${lvChip(p.level)}<span class="num">第${noIn(p)}問</span></span>${solved.has(p.id) ? '<span class="chip done">✓ 解けた</span>' : ""}</div>
+        <div class="t">${esc(p.title)}</div>
+        <div class="row">${typeChip(p.type)}<span class="chip">${colName(p.first)}番</span>${p.ex ? '<span class="chip ex">例題</span>' : ""}</div>
+        ${ordering ? (() => { const sl = series(p.level), k = sl.indexOf(p);
+          return `<div class="row"><button class="btn small" type="button" data-mv="-1" data-id2="${p.id}" ${k === 0 ? "disabled" : ""} aria-label="${esc(p.title)}を前へ">← 前へ</button><button class="btn small" type="button" data-mv="1" data-id2="${p.id}" ${k === sl.length - 1 ? "disabled" : ""} aria-label="${esc(p.title)}を後へ">後へ →</button></div>
+          <div class="row moveto"><span class="note-s" style="font-weight:700">第</span><input type="number" id="to-${p.id}" min="1" max="${sl.length}" value="${k + 1}" inputmode="numeric" aria-label="${esc(p.title)}の移動先の問題番号"><span class="note-s" style="font-weight:700">問へ</span><button class="btn small" type="button" data-to="${p.id}">移す</button></div>`; })()
+          : `<div class="row"><button class="btn small primary" type="button" data-solve="${p.id}">解く</button></div>`}
+      </article>`;
+    $("grid").innerHTML = ["basic", "mid", "adv"].filter(l => lvFilter === "all" || lvFilter === l).map(l => {
+      const all = series(l), items = list.filter(p => p.level === l), done = all.filter(p => solved.has(p.id)).length;
+      return `<section class="series">
+        <div class="series-head${l !== "basic" ? " " + l : ""}"><h2>${LV[l]}<span class="en">${{ basic: "BASIC", mid: "INTERMEDIATE", adv: "ADVANCED" }[l]}</span></h2>
+          <span class="muted">${all.length}問・解けた ${done}問</span>
+          <span class="note-s">${{ basic: "ナナゴのルールに慣れるための問題", mid: "数手先まで読んで解く問題", adv: "読みが深い、手応えのある問題" }[l]}</span></div>
+        ${items.length ? `<div class="grid">${items.map(card).join("")}</div>` : `<div class="empty">${all.length ? "この種類の問題はまだありません。" : `まだ${LV[l]}がありません。問題を作る時に「${LV[l]}」を選んでください。`}</div>`}
+      </section>`;
+    }).join("");
+    requestAnimationFrame(() => document.querySelectorAll("[data-thumb]").forEach(cv => {
+      const p = problems.find(x => x.id === cv.dataset.thumb); drawBoard(cv, { b: setupBoard(p), n: p.size, chainN: p.chainN, small: true, symbols: p.marks });
+    }));
+  }
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  $("grid").addEventListener("click", e => {
+    const s = e.target.closest("[data-solve]"), ed = e.target.closest("[data-edit]"), th = e.target.closest("[data-thumb]");
+    const tob = e.target.closest("[data-to]");
+    if (tob) { moveTo(tob.dataset.to); return; }
+    const mvb = e.target.closest("[data-mv]");
+    if (mvb) {
+      const p = problems.find(x => x.id === mvb.dataset.id2), sl = series(p.level), k = sl.indexOf(p), q = sl[k + +mvb.dataset.mv];
+      if (!q) return;
+      const a = problems.indexOf(p), b = problems.indexOf(q); problems[a] = q; problems[b] = p; saveAll(); renderList();
+      const again = document.querySelector(`[data-mv="${mvb.dataset.mv}"][data-id2="${p.id}"]:not([disabled])`) || document.querySelector(`[data-id2="${p.id}"]:not([disabled])`);
+      if (again) again.focus();
+      return;
+    }
+    if (ordering) return;
+    if (s) startSolve(s.dataset.solve); else if (ed) startEdit(ed.dataset.edit); else if (th) startSolve(th.dataset.thumb);
+  });
+  // 指定した番号へ移し、間の問題を1問ずつずらす
+  function moveTo(id){
+    const p = problems.find(x => x.id === id), sl = series(p.level);
+    let n = Math.round(+$("to-" + id).value);
+    if (!n) return;
+    n = Math.min(Math.max(n, 1), sl.length);
+    const slots = problems.map((x, i) => x.level === p.level ? i : -1).filter(i => i >= 0);
+    const order = sl.filter(x => x !== p); order.splice(n - 1, 0, p);
+    slots.forEach((g, j) => { problems[g] = order[j]; });
+    saveAll(); renderList();
+    const card = document.querySelector(`.card[data-id="${id}"]`);
+    if (card) { card.scrollIntoView({ block: "nearest" }); const inp = $("to-" + id); if (inp) inp.focus(); }
+  }
+  $("grid").addEventListener("keydown", e => { if (e.key === "Enter" && e.target.id && e.target.id.startsWith("to-")) moveTo(e.target.id.slice(3)); });
+  $("b-order").addEventListener("click", () => { ordering = !ordering; renderList(); });
+  $("lvfilter").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return; lvFilter = b.dataset.l;
+    $("lvfilter").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); renderList();
+  });
+  $("filter").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return; filter = b.dataset.f;
+    $("filter").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", String(x === b))); renderList();
+  });
+
+  /* ---------- 解く ---------- */
+  let S = null; // { p, moves, b, ko, turn, state:"play"|"good"|"bad", last, busy, ghost, mark }
+  function startSolve(id){
+    const p = problems.find(x => x.id === id); if (!p) return;
+    S = { p, moves: [], b: setupBoard(p), ko: -1, turn: p.first, state: "play", last: -1, busy: false, ghost: -1, mark: null };
+    $("verdict").hidden = true; setMsg("");
+    show("solve"); fillSolvePanel();
+  }
+  function fillSolvePanel(){
+    const p = S.p, no = noIn(p), total = series(p.level).length;
+    $("s-num").textContent = `${LV[p.level]} 第${no}問 / 全${total}問`;
+    $("s-chips").innerHTML = lvChip(p.level) + typeChip(p.type) + (solved.has(p.id) ? '<span class="chip done">✓ 解けた</span>' : "");
+    $("s-title").textContent = p.title;
+    $("s-ask").innerHTML = `<span class="dot ${p.first === 1 ? "b" : "w"}"></span>${colName(p.first)}番：` + (p.type === "live" ? `${p.chainN}子つないで生きてください` : `${p.chainN}子つながる前に取ってください`);
+    $("s-desc").textContent = p.desc || ""; $("s-desc").hidden = !p.desc;
+    $("b-prev").disabled = no <= 1; $("b-next").disabled = no >= total;
+  }
+  function setMsg(t, k){ $("s-msg").textContent = t; $("s-msg").className = "msg" + (k ? " " + k : ""); }
+  function drawSolve(){
+    if (!S) return;
+    drawBoard($("cv-solve"), { b: S.b, n: S.p.size, chainN: S.p.chainN, last: S.last, symbols: S.p.marks,
+      ghost: S.state === "play" && !S.busy && S.turn === S.p.first ? { i: S.ghost, c: S.turn } : null,
+      marks: S.mark != null ? [{ i: S.mark, color: css("--ok") }] : [] });
+  }
+  const matching = (lines, moves) => lines.filter(l => moves.every((m, k) => l.moves[k] === m) && l.moves.length >= moves.length);
+  function finish(line){
+    S.state = line.ok ? "good" : "bad";
+    if (line.ok) { solved.add(S.p.id); saveSolved(); fillSolvePanel(); }
+    verdict(line.ok, line.note || (line.ok ? "よくできました" : ""));
+  }
+  function verdict(ok, note){
+    $("verdict").className = "verdict " + (ok ? "good" : "bad");
+    $("verdict-t").textContent = ok ? "正解！" : "不正解";
+    $("verdict-note").textContent = note || ""; $("verdict").hidden = false;
+    setMsg(ok ? "正解です。次の問題へ進めます。" : "「やり直す」でもう一度挑戦できます。", ok ? "good" : "bad");
+  }
+  function solverMove(i){
+    const p = S.p; const r = play(S.b, p.size, i, S.turn, p.chainN, S.ko);
+    if (!r.ok) { setMsg(r.why, "bad"); return; }
+    S.mark = null; S.b = r.b; S.ko = r.ko; S.turn = 3 - S.turn; S.last = i; S.moves.push(i);
+    const cand = matching(p.lines, S.moves);
+    if (!cand.length) { S.state = "bad"; drawSolve(); verdict(false, p.type === "live" ? "その手では生きられません" : "その手では取れません"); return; }
+    const end = cand.find(l => l.moves.length === S.moves.length);
+    if (end) { drawSolve(); finish(end); return; }
+    setMsg("相手が考えています…"); S.busy = true; drawSolve();
+    setTimeout(() => {
+      const nexts = cand.filter(l => l.moves.length > S.moves.length);
+      // 相手は記録された応じ方から選ぶ（不正解の続きがあればそちらを優先）
+      const pick = (nexts.find(l => !l.ok) || nexts[Math.floor(Math.random() * nexts.length)]);
+      const m = pick.moves[S.moves.length]; const r2 = play(S.b, p.size, m, S.turn, p.chainN, S.ko);
+      S.busy = false;
+      if (!r2.ok) { setMsg("手順の記録に打てない手があります。問題を編集して直してください。", "bad"); return; }
+      S.b = r2.b; S.ko = r2.ko; S.turn = 3 - S.turn; S.last = m; S.moves.push(m);
+      const after = matching(p.lines, S.moves), end2 = after.find(l => l.moves.length === S.moves.length);
+      setMsg(`${colName(3 - S.turn)}は ${coord(m, p.size)} に打ちました。続けてください。`);
+      drawSolve(); if (end2) finish(end2);
+    }, 450);
+  }
+  const cvS = $("cv-solve");
+  cvS.addEventListener("click", e => {
+    if (!S) return;
+    if (!$("verdict").hidden) { $("verdict").hidden = true; return; }
+    if (S.state !== "play" || S.busy || S.turn !== S.p.first) return;
+    const i = pointAt(cvS, S.p.size, e); if (i >= 0) solverMove(i);
+  });
+  cvS.addEventListener("mousemove", e => { if (!S) return; const i = pointAt(cvS, S.p.size, e); if (i !== S.ghost) { S.ghost = i; drawSolve(); } });
+  cvS.addEventListener("mouseleave", () => { if (S) { S.ghost = -1; drawSolve(); } });
+  $("b-retry").addEventListener("click", () => S && startSolve(S.p.id));
+  $("b-hint").addEventListener("click", () => {
+    if (!S || S.state !== "play" || S.busy) return;
+    const okLine = matching(S.p.lines, S.moves).find(l => l.ok && l.moves.length > S.moves.length);
+    if (!okLine) { setMsg("ここからの正解は記録されていません。「やり直す」を押してください。", "bad"); return; }
+    S.mark = okLine.moves[S.moves.length]; setMsg("緑の印の所に打ってみましょう。"); drawSolve();
+  });
+  $("b-answer").addEventListener("click", () => {
+    if (!S || S.busy) return;
+    const okLine = S.p.lines.find(l => l.ok); if (!okLine) { setMsg("正解の手順が記録されていません。", "bad"); return; }
+    const id = S.p.id; startSolve(id); S.busy = true; S.state = "answer"; setMsg("正解の手順を並べています…");
+    let k = 0;
+    const step = () => {
+      if (!S || S.p.id !== id || view !== "solve") return;
+      if (k >= okLine.moves.length) { S.busy = false; setMsg(`正解の手順：${okLine.moves.map((m, j) => colName(j % 2 ? 3 - S.p.first : S.p.first) + coord(m, S.p.size)).join("→")}${okLine.note ? "。" + okLine.note : ""}`, "good"); return; }
+      const m = okLine.moves[k++], r = play(S.b, S.p.size, m, S.turn, S.p.chainN, S.ko);
+      if (r.ok) { S.b = r.b; S.ko = r.ko; S.turn = 3 - S.turn; S.last = m; }
+      drawSolve(); setTimeout(step, 700);
+    };
+    setTimeout(step, 300);
+  });
+  // 前後の問題は同じシリーズの中で移動する
+  const go = d => { const list = series(S.p.level), k = list.indexOf(S.p) + d; if (list[k]) startSolve(list[k].id); };
+  $("b-prev").addEventListener("click", () => go(-1));
+  $("b-next").addEventListener("click", () => go(1));
+  $("b-to-list").addEventListener("click", () => show("list"));
+  $("b-edit-this").addEventListener("click", () => startEdit(S.p.id));
+
+  /* ---------- 作る ---------- */
+  let E = null; // { d: 下書き, tool, rec:null|{moves,b,ko,turn}, editingId }
+  function blank(){ return { id: newId(), marks: {}, title: "", level: "basic", type: "live", size: 9, first: 1, chainN: 7, desc: "", b: [], w: [], lines: [] }; }
+  function startEdit(id){
+    const src = id ? problems.find(x => x.id === id) : null;
+    const d = src ? JSON.parse(JSON.stringify(src)) : blank(); delete d.ex;
+    if (!d.marks) d.marks = {};
+    E = { d, tool: 1, mark: null, rec: null, editingId: src ? src.id : null, view: null };
+    $("e-head").textContent = src ? "問題を編集" : "新しい問題";
+    $("e-title").value = d.title; $("e-desc").value = d.desc || "";
+    $("e-first").value = String(d.first); $("e-size").value = String(d.size); $("e-chain").value = String(d.chainN);
+    segSet("e-type", d.type); segSet("e-level", d.level || "basic"); segSet("e-tool", "1"); segSet("e-mark", "");
+    $("b-del").hidden = !src; $("del-confirm").hidden = true; $("e-err").textContent = "";
+    stopRec(); show("edit"); renderLines();
+  }
+  function segSet(id, v){ $(id).querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v))); }
+  function editBoard(){
+    if (E.rec) return E.rec.b;
+    if (E.view) return E.view.b;
+    return setupBoard(E.d);
+  }
+  function drawEdit(){
+    if (!E) return;
+    const d = E.d, marks = [];
+    if (E.rec) {
+      const cont = matching(d.lines, E.rec.moves).filter(l => l.moves.length > E.rec.moves.length);
+      const seen = new Map();
+      for (const l of cont) { const m = l.moves[E.rec.moves.length]; if (!seen.has(m) || l.ok) seen.set(m, l.ok); }
+      seen.forEach((ok, i) => marks.push({ i, color: ok ? css("--ok") : css("--warn") }));
+    }
+    drawBoard($("cv-edit"), { b: editBoard(), n: d.size, chainN: d.chainN, marks, symbols: d.marks,
+      last: E.rec ? E.rec.moves[E.rec.moves.length - 1] : E.view ? E.view.last : -1,
+      ghost: E.rec ? { i: E.ghost ?? -1, c: E.rec.turn } : (E.view || E.mark ? null : { i: E.tool ? (E.ghost ?? -1) : -1, c: E.tool }) });
+    $("legend").hidden = !E.rec;
+  }
+  const cvE = $("cv-edit");
+  cvE.addEventListener("click", e => {
+    if (!E) return; const d = E.d, i = pointAt(cvE, d.size, e); if (i < 0) return;
+    if (E.view) { E.view = null; renderLines(); }
+    if (E.rec) {
+      const r = play(E.rec.b, d.size, i, E.rec.turn, d.chainN, E.rec.ko);
+      if (!r.ok) { recMsg(r.why); return; }
+      E.rec.moves.push(i); E.rec.b = r.b; E.rec.ko = r.ko; E.rec.turn = 3 - E.rec.turn;
+      recMsg(); drawEdit(); return;
+    }
+    // マークを付ける
+    if (E.mark) {
+      const m = d.marks;
+      if (E.mark === "del") delete m[i];
+      else if (E.mark === "abc") {
+        if (m[i] && m[i].length === 1) delete m[i];
+        else { const used = new Set(Object.values(m)); const L = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").find(ch => !used.has(ch)) || "Z"; m[i] = L; }
+      } else if (m[i] === E.mark) delete m[i]; else m[i] = E.mark;
+      drawEdit(); return;
+    }
+    // 石を並べる
+    const has = d.b.includes(i) ? 1 : d.w.includes(i) ? 2 : 0;
+    d.b = d.b.filter(x => x !== i); d.w = d.w.filter(x => x !== i);
+    if (E.tool && has !== E.tool) (E.tool === 1 ? d.b : d.w).push(i);
+    if (d.lines.length) { d.lines = []; renderLines(); $("e-err").textContent = "石を動かしたので、記録した手順を消しました。もう一度記録してください。"; }
+    drawEdit();
+  });
+  cvE.addEventListener("mousemove", e => { if (!E) return; const i = pointAt(cvE, E.d.size, e); if (i !== E.ghost) { E.ghost = i; drawEdit(); } });
+  cvE.addEventListener("mouseleave", () => { if (E) { E.ghost = -1; drawEdit(); } });
+  $("e-tool").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; E.tool = +b.dataset.v; E.mark = null; segSet("e-tool", b.dataset.v); segSet("e-mark", ""); });
+  $("e-mark").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; E.mark = b.dataset.v; segSet("e-mark", b.dataset.v); segSet("e-tool", ""); });
+  $("b-clear-marks").addEventListener("click", () => { E.d.marks = {}; drawEdit(); });
+  $("e-level").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; E.d.level = b.dataset.v; segSet("e-level", b.dataset.v); });
+  $("e-type").addEventListener("click", e => { const b = e.target.closest("button"); if (!b) return; E.d.type = b.dataset.v; segSet("e-type", b.dataset.v); });
+  $("e-title").addEventListener("input", e => { E.d.title = e.target.value; });
+  $("e-desc").addEventListener("input", e => { E.d.desc = e.target.value; });
+  function resetLines(why){ if (E.d.lines.length) { E.d.lines = []; $("e-err").textContent = why; } stopRec(); renderLines(); drawEdit(); }
+  $("e-first").addEventListener("change", e => { E.d.first = +e.target.value; resetLines("手番を変えたので、記録した手順を消しました。"); });
+  $("e-chain").addEventListener("change", e => { E.d.chainN = +e.target.value; resetLines("つながる数を変えたので、記録した手順を消しました。"); });
+  $("e-size").addEventListener("change", e => {
+    const n = +e.target.value, d = E.d, old = d.size;
+    // 左上をそろえて石を移す（はみ出した石は消える）
+    const mv = arr => arr.map(i => [i % old, i / old | 0]).filter(([x, y]) => x < n && y < n).map(([x, y]) => y * n + x);
+    d.b = mv(d.b); d.w = mv(d.w);
+    const nm = {}; for (const k in d.marks || {}) { const x = k % old, y = k / old | 0; if (x < n && y < n) nm[y * n + x] = d.marks[k]; } d.marks = nm;
+    d.size = n;
+    resetLines("盤の大きさを変えたので、記録した手順を消しました。");
+  });
+  $("b-clear").addEventListener("click", () => { E.d.b = []; E.d.w = []; resetLines("石を消したので、記録した手順も消しました。"); });
+
+  function recMsg(why){
+    if (why) { $("rec-msg").textContent = why; $("rec-msg").className = "msg bad"; return; }
+    const r = E.rec, d = E.d;
+    $("rec-msg").className = "msg";
+    $("rec-msg").textContent = r.moves.length ? `${r.moves.length}手目まで：${r.moves.map(m => coord(m, d.size)).join("→")}。次は${colName(r.turn)}の番です。` : `${colName(r.turn)}から打ってください。`;
+  }
+  function stopRec(){ if (E) E.rec = null; $("rec-on").hidden = true; $("rec-idle").hidden = false; $("rec-note").value = ""; }
+  $("b-rec").addEventListener("click", () => {
+    const d = E.d; if (!d.b.length && !d.w.length) { $("e-err").textContent = "先に石を並べてください。"; return; }
+    E.view = null; E.rec = { moves: [], b: setupBoard(d), ko: -1, turn: d.first };
+    $("rec-on").hidden = false; $("rec-idle").hidden = true; $("e-err").textContent = ""; recMsg(); drawEdit();
+  });
+  $("b-rec-undo").addEventListener("click", () => {
+    const r = E.rec; if (!r || !r.moves.length) return; r.moves.pop();
+    const st = replay(E.d, r.moves); Object.assign(r, { b: st.b, ko: st.ko, turn: st.turn }); recMsg(); drawEdit();
+  });
+  function saveLine(ok){
+    const r = E.rec; if (!r) return;
+    if (!r.moves.length) { recMsg("1手以上打ってから保存してください。"); return; }
+    const key = r.moves.join(",");
+    E.d.lines = E.d.lines.filter(l => l.moves.join(",") !== key);
+    E.d.lines.push({ moves: r.moves.slice(), ok, note: $("rec-note").value.trim() });
+    $("e-err").textContent = ""; stopRec(); renderLines(); drawEdit();
+  }
+  $("b-rec-ok").addEventListener("click", () => saveLine(true));
+  $("b-rec-ng").addEventListener("click", () => saveLine(false));
+  $("b-rec-stop").addEventListener("click", () => { stopRec(); drawEdit(); });
+  function renderLines(){
+    const d = E.d;
+    $("lines").innerHTML = d.lines.length ? d.lines.map((l, k) => `<div class="line">
+      <span class="${l.ok ? "ok" : "ng"}">${l.ok ? "正解" : "不正解"}</span>
+      <span class="mv">${l.moves.map((m, j) => (j % 2 ? colName(3 - d.first) : colName(d.first)) + coord(m, d.size)).join(" → ")}${l.note ? `<br><span class="muted">${esc(l.note)}</span>` : ""}</span>
+      <button class="btn small" type="button" data-show="${k}">見る</button>
+      <button class="btn small danger" type="button" data-rm="${k}" aria-label="この手順を消す">消す</button></div>`).join("")
+      : `<p class="note-s">まだ手順がありません。</p>`;
+  }
+  $("lines").addEventListener("click", e => {
+    const s = e.target.closest("[data-show]"), rm = e.target.closest("[data-rm]");
+    if (rm) { E.d.lines.splice(+rm.dataset.rm, 1); E.view = null; renderLines(); drawEdit(); }
+    else if (s) { const l = E.d.lines[+s.dataset.show], st = replay(E.d, l.moves); if (st) { stopRec(); E.view = { b: st.b, last: l.moves[l.moves.length - 1] }; drawEdit(); } }
+  });
+  function commit(){
+    const d = E.d; d.title = $("e-title").value.trim(); d.desc = $("e-desc").value.trim();
+    if (!d.title) { $("e-err").textContent = "題名を入れてください。"; $("e-title").focus(); return null; }
+    if (!d.b.length && !d.w.length) { $("e-err").textContent = "盤に石を並べてください。"; return null; }
+    if (!d.lines.some(l => l.ok)) { $("e-err").textContent = "正解の手順を1つ以上記録してください。"; return null; }
+    if (E.rec && E.rec.moves.length) { $("e-err").textContent = "記録中の手順があります。保存するか「記録をやめる」を押してください。"; return null; }
+    const k = problems.findIndex(x => x.id === E.editingId);
+    if (k >= 0) problems[k] = d; else problems.push(d);
+    saveAll(); return d;
+  }
+  $("b-save").addEventListener("click", () => { if (commit()) show("list"); });
+  $("b-test").addEventListener("click", () => { const d = commit(); if (d) startSolve(d.id); });
+  $("b-cancel").addEventListener("click", () => show("list"));
+  $("b-del").addEventListener("click", () => { $("del-confirm").hidden = false; });
+  $("b-del-no").addEventListener("click", () => { $("del-confirm").hidden = true; });
+  $("b-del-yes").addEventListener("click", () => {
+    problems = problems.filter(x => x.id !== E.editingId); solved.delete(E.editingId); saveAll(); saveSolved(); show("list");
+  });
+
+  /* ---------- Claudeが作った問題 ---------- */
+  const BUNDLE = [];
+  function bundleUI(){
+    const left = BUNDLE.filter(b => !problems.some(p => p.id === b.id)).length;
+    $("b-bundle").disabled = left === 0;
+    $("b-bundle").textContent = left === 0 ? "追加済み" : left === BUNDLE.length ? `${left}問を追加する` : `残り${left}問を追加する`;
+  }
+  $("b-bundle").addEventListener("click", () => {
+    let n = 0;
+    for (const b of BUNDLE) if (!problems.some(p => p.id === b.id)) { problems.push(JSON.parse(JSON.stringify(b))); n++; }
+    saveAll(); renderList(); $("list-count").textContent += `（${n}問を追加しました）`;
+  });
+
+  /* ---------- 書き出し・読み込み ---------- */
+  $("b-export").addEventListener("click", () => {
+    $("import-box").hidden = true; $("export-box").hidden = !$("export-box").hidden;
+    $("export-text").value = JSON.stringify({ nanago: 1, problems: problems.filter(p => !p.ex) }); $("copy-msg").textContent = "";
+  });
+  $("b-copy").addEventListener("click", () => {
+    const ta = $("export-text");
+    navigator.clipboard.writeText(ta.value).then(() => { $("copy-msg").textContent = "コピーしました"; })
+      .catch(() => { ta.focus(); ta.select(); $("copy-msg").textContent = "選択しました。コピーしてください"; });
+  });
+  $("b-import").addEventListener("click", () => { $("export-box").hidden = true; $("import-box").hidden = !$("import-box").hidden; $("import-msg").textContent = ""; });
+  $("b-import-go").addEventListener("click", () => {
+    let data; try { data = JSON.parse($("import-text").value); } catch { $("import-msg").textContent = "読み込めませんでした。書き出した文字を全部貼り付けてください。"; return; }
+    const list = Array.isArray(data) ? data : data && data.problems;
+    const valid = (list || []).filter(p => p && Array.isArray(p.b) && Array.isArray(p.w) && Array.isArray(p.lines) && p.size);
+    if (!valid.length) { $("import-msg").textContent = "問題が見つかりませんでした。"; return; }
+    let added = 0;
+    for (const p of valid) { if (problems.some(x => x.id === p.id)) p.id = newId(); delete p.ex; if (p.level === "hard") p.level = "mid"; if (p.level !== "adv" && p.level !== "mid") p.level = "basic"; problems.push(p); added++; }
+    saveAll(); $("import-text").value = ""; $("import-msg").textContent = ""; $("import-box").hidden = true; renderList();
+    $("list-count").textContent += `（${added}問を追加しました）`;
+  });
+
+  $("home").addEventListener("click", () => show("list"));
+  $("b-new").addEventListener("click", () => { startEdit(null); if (lvFilter !== "all") { E.d.level = lvFilter; segSet("e-level", lvFilter); } });
+  window.addEventListener("resize", () => { if (view === "list") renderList(); else if (view === "solve") drawSolve(); else drawEdit(); });
+  if (window.matchMedia) matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", () => show(view));
+  // 報告
+  function reportText(){
+    const p = S.p, mv = S.moves.map((m, j) => colName(j % 2 ? 3 - p.first : p.first) + coord(m, p.size)).join("→") || "（まだ打っていません）";
+    const res = S.state === "good" ? "正解" : S.state === "bad" ? "不正解" : "途中";
+    return `問題：${LV[p.level]} 第${noIn(p)}問「${p.title}」（${p.id}）\n打った手順：${mv}\n結果：${res}\n\n内容：\n${$("report-text").value.trim() || "（未記入）"}`;
+  }
+  function reportLink(){
+    if (!S) return;
+    const title = `【報告】${LV[S.p.level]} 第${noIn(S.p)}問「${S.p.title}」`;
+    $("report-go").href = REPORT_URL + "?title=" + encodeURIComponent(title) + "&body=" + encodeURIComponent(reportText());
+  }
+  $("b-report").addEventListener("click", () => { $("report-box").hidden = !$("report-box").hidden; reportLink(); });
+  $("report-text").addEventListener("input", reportLink);
+  $("report-go").addEventListener("mousedown", reportLink);
+  $("report-go").addEventListener("focus", reportLink);
+  $("report-copy").addEventListener("click", () => {
+    const t = reportText();
+    navigator.clipboard.writeText(t).then(() => { $("report-msg").textContent = "報告文をコピーしました。"; })
+      .catch(() => { $("report-text").value = t; $("report-text").select(); $("report-msg").textContent = "報告文を選択しました。コピーしてください。"; });
+  });
+  const oldStart = startSolve;
+  startSolve = id => { oldStart(id); $("report-box").hidden = true; $("report-text").value = ""; };
+
+  $("list-count").textContent = "問題を読み込んでいます…";
+  $("grid").innerHTML = "";
+  fetch("problems.json", { cache: "no-cache" }).then(r => { if (!r.ok) throw 0; return r.json(); })
+    .then(d => { problems = (d.problems || []).map(p => ({ ...p, level: ["basic", "mid", "adv"].includes(p.level) ? p.level : "basic" })); show("list"); })
+    .catch(() => { $("list-count").textContent = "問題を読み込めませんでした。ページを再読み込みしてください。"; });
+})();
+</script>
+
+</body>
+</html>
